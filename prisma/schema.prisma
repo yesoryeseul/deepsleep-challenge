@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model applicant {
+  apply_id     Int      @id
+  member_name  String   @db.VarChar(20)
+  email        String   @db.VarChar(100)
+  kakao_id     String   @db.VarChar(100)
+  time_options Int      @db.TinyInt
+  introduction String?  @db.VarChar(100)
+  apply_time   DateTime @db.Timestamp(0)
+  pass_or_not  Boolean
+}
+
+model generation {
+  generation_id         Int     @id
+  generation_level      Int?    @default(1)
+  generation_start_date String? @db.VarChar(255)
+  generation_end_date   String? @db.VarChar(255)
+}
+
+model member {
+  member_id   String @id @default(dbgenerated("(uuid())")) @db.VarChar(40)
+  apply_id    Int
+  mobi_id     String @db.VarChar(20)
+  member_role Int    @db.TinyInt
+  generation  String @db.VarChar(100)
+}
+
+model mobimember {
+  memeber_id       String @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  apply_id         String @db.VarChar(36)
+  member_role      Int
+  member_major     Int
+  apply_generation Int
+}
+
+model project {
+  project_id            String        @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  project_title         String        @db.VarChar(255)
+  project_thumbnail_url String        @db.VarChar(255)
+  project_deploy_url    String?       @db.VarChar(255)
+  project_github_url    String?       @db.VarChar(255)
+  project_introduction  String        @db.Text
+  projectstack          projectstack?
+}
+
+model projectimage {
+  image_id   String @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  project_id String @db.VarChar(255)
+  image_url  String @db.VarChar(255)
+}
+
+model projectstack {
+  project_id String  @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  stack_id   Int
+  project    project @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction, map: "projectstack_ibfk_1")
+}
+
+model sponsor {
+  sponsor_id               String  @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  sponsor_name             String  @db.VarChar(255)
+  sponsor_thumbnail_url    String? @db.VarChar(255)
+  sponsor_page_url         String? @db.VarChar(255)
+  sponsor_donation_account Int
+}
+
+model stack {
+  stack_id    Int    @id
+  stack_name  String @db.VarChar(255)
+  stack_image String @db.VarChar(255)
+  stack_color String @db.VarChar(255)
+}
