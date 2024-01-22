@@ -8,59 +8,66 @@ datasource db {
 }
 
 model applicant {
-  apply_id     Int      @id
-  member_name  String   @db.VarChar(20)
-  email        String   @db.VarChar(100)
-  kakao_id     String   @db.VarChar(100)
-  time_options Int      @db.TinyInt
-  introduction String?  @db.VarChar(100)
-  apply_time   DateTime @db.Timestamp(0)
-  pass_or_not  Boolean
+  apply_id          String       @id @default(dbgenerated("(uuid())")) @db.VarChar(40)
+  apply_name        String       @db.VarChar(20)
+  apply_email       String       @db.VarChar(255)
+  apply_kakao_id    String       @db.VarChar(100)
+  apply_time_option Int          @db.TinyInt
+  apply_major       Int          @db.TinyInt
+  apply_intro       String?      @db.MediumText
+  apply_time        DateTime     @default(now()) @db.Timestamp(0)
+  apply_pass_or_not Boolean
+  apply_generation  Int
+  generation        generation   @relation(fields: [apply_generation], references: [generation_id], onDelete: NoAction, onUpdate: NoAction, map: "applicant_ibfk_1")
+  mobimember        mobimember[]
+
+  @@index([apply_generation], map: "apply_generation")
 }
 
 model generation {
-  generation_id         Int     @id
-  generation_level      Int?    @default(1)
-  generation_start_date String? @db.VarChar(255)
-  generation_end_date   String? @db.VarChar(255)
-}
-
-model member {
-  member_id   String @id @default(dbgenerated("(uuid())")) @db.VarChar(40)
-  apply_id    Int
-  mobi_id     String @db.VarChar(20)
-  member_role Int    @db.TinyInt
-  generation  String @db.VarChar(100)
+  generation_id         Int         @id @default(autoincrement())
+  generation_level      Int
+  generation_start_date String      @db.VarChar(255)
+  generation_end_date   String      @db.VarChar(255)
+  applicant             applicant[]
 }
 
 model mobimember {
-  memeber_id       String @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
-  apply_id         String @db.VarChar(36)
-  member_role      Int
-  member_major     Int
-  apply_generation Int
+  member_id         String    @id @default(dbgenerated("(uuid())")) @db.VarChar(40)
+  apply_id          String    @default(dbgenerated("(uuid())")) @db.VarChar(40)
+  member_role       Int       @db.TinyInt
+  member_major      Int       @db.TinyInt
+  member_generation String    @db.VarChar(100)
+  applicant         applicant @relation(fields: [apply_id], references: [apply_id], onDelete: NoAction, onUpdate: NoAction, map: "mobimember_ibfk_1")
+
+  @@index([apply_id], map: "apply_id")
 }
 
 model project {
-  project_id            String        @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
-  project_title         String        @db.VarChar(255)
-  project_thumbnail_url String        @db.VarChar(255)
-  project_deploy_url    String?       @db.VarChar(255)
-  project_github_url    String?       @db.VarChar(255)
-  project_introduction  String        @db.Text
-  projectstack          projectstack?
+  project_id            String         @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  project_title         String         @db.VarChar(255)
+  project_thumbnail_url String         @db.VarChar(255)
+  project_deploy_url    String?        @db.VarChar(255)
+  project_github_url    String?        @db.VarChar(255)
+  project_introduction  String         @db.Text
+  projectimage          projectimage[]
 }
 
 model projectimage {
-  image_id   String @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
-  project_id String @db.VarChar(255)
-  image_url  String @db.VarChar(255)
+  image_id   String  @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  project_id String  @db.VarChar(255)
+  image_url  String  @db.VarChar(255)
+  project    project @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction, map: "projectimage_ibfk_1")
+
+  @@index([project_id], map: "project_id")
 }
 
 model projectstack {
-  project_id String  @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  project_id String @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
   stack_id   Int
-  project    project @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction, map: "projectstack_ibfk_1")
+  stack      stack  @relation(fields: [stack_id], references: [stack_id], onDelete: NoAction, onUpdate: NoAction, map: "projectstack_ibfk_1")
+
+  @@index([stack_id], map: "stack_id")
 }
 
 model sponsor {
@@ -72,8 +79,9 @@ model sponsor {
 }
 
 model stack {
-  stack_id    Int    @id
-  stack_name  String @db.VarChar(255)
-  stack_image String @db.VarChar(255)
-  stack_color String @db.VarChar(255)
+  stack_id     Int            @id @default(autoincrement())
+  stack_name   String         @db.VarChar(255)
+  stack_image  String         @db.VarChar(255)
+  stack_color  String         @db.VarChar(255)
+  projectstack projectstack[]
 }
