@@ -51,6 +51,7 @@ model project {
   project_github_url    String?        @db.VarChar(255)
   project_introduction  String         @db.Text
   projectimage          projectimage[]
+  projectstack          projectstack?
 }
 
 model projectimage {
@@ -63,9 +64,10 @@ model projectimage {
 }
 
 model projectstack {
-  project_id String @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  project_id String  @id @default(dbgenerated("(uuid())")) @db.VarChar(36)
   stack_id   Int
-  stack      stack  @relation(fields: [stack_id], references: [stack_id], onDelete: NoAction, onUpdate: NoAction, map: "projectstack_ibfk_1")
+  project    project @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction, map: "projectstack_ibfk_1")
+  stack      stack   @relation(fields: [stack_id], references: [stack_id], onDelete: NoAction, onUpdate: NoAction, map: "projectstack_ibfk_2")
 
   @@index([stack_id], map: "stack_id")
 }
